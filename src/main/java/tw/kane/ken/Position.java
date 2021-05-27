@@ -2,18 +2,20 @@ package tw.kane.ken;
 
 public class Position {
 
-    int col, row, index;
+    int col, row;
 
     public Position() {
         col = 1;
         row = 1;
-        index = 0;
     }
 
-    public Position jumpTo(int col, int row, int index) {
+    public void jumpTo(int col, int row) {
         this.col = col;
         this.row = row;
-        this.index = index;
-        return this;
+    }
+
+    public void move(int col, int row) {
+        this.col += col;
+        this.row += row;
     }
 }

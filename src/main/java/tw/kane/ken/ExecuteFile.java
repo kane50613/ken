@@ -17,6 +17,9 @@ public class ExecuteFile {
 
     private ExecuteFile(String path) throws IOException {
         file = new File(path);
-        Files.readAllLines(Paths.get(path)).forEach(System.out::println);
+    }
+
+    public static File getFile() {
+        return _instance.file;
     }
 }
