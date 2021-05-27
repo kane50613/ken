@@ -81,6 +81,7 @@ public class Lexer {
         if(isToken(ESCAPE)) {
             position.move(1, 0);
             stringBuilder.append(getString(1));
+            position.move(1, 0);
             return makeString(stringBuilder);
         }
         if(isToken(QUOTE)) {
