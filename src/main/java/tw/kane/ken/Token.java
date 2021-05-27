@@ -9,7 +9,8 @@ public class Token {
     public Token(TokenType type, String value, Position position) {
         this.type = type;
         this.value = value;
-        this.position = position;
+        this.position = new Position();
+        this.position.jumpTo(position.col, position.row);
     }
 
     public static String[] DIGITS = {"0","1","2","3","4","5","6","7","8","9"};
@@ -32,10 +33,10 @@ public class Token {
         NUMBER("NUMBER"),
         TRUE("true"),
         FALSE("false"),
-        PRINT("print"),
         FUNCTION("function"),
         IF("if"),
-        ELSE("else");
+        ELSE("else"),
+        METHOD("method");
 
         private final String name;
 

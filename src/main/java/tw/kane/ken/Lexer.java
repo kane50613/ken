@@ -1,6 +1,8 @@
 package tw.kane.ken;
 
 import tw.kane.ken.error.IllegalCharacterException;
+import tw.kane.ken.function.BuiltInFunction;
+import tw.kane.ken.function.Function;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,10 +19,10 @@ public class Lexer {
     private final List<String> input;
     private final ArrayList<Token> tokens;
 
-    public Lexer(File file) throws IOException {
+    public Lexer(ExecuteFile file) throws IOException {
         position = new Position();
         tokens = new ArrayList<>();
-        input = Files.readAllLines(file.toPath()).stream()
+        input = Files.readAllLines(file.getFile().toPath()).stream()
                 .filter(x -> x.length() > 0)
                 .collect(Collectors.toList());
     }
@@ -58,23 +60,39 @@ public class Lexer {
             }
         }
 
-        throw new IllegalCharacterException(getString(1), position);
+        for (Function function : BuiltInFunction.functions) {
+            if(getString(function.getName().length()).equals(function.getName())) {
+                tokens.add(new Token(METHOD, function.getName(), position));
+                position.move(function.getName().length(), 0);
+                return parse();
+            }
+        }
+
+        System.out.println("none");
+
+        throw new IllegalCharacterException(getString(1), input.get(position.row - 1), position);
     }
 
-    public String makeNumber(StringBuilder stringBuilder) {
+    public ArrayList<Token> getTokens() {
+        return tokens;
+    }
+
+    private String makeNumber(StringBuilder stringBuilder) {
         if(isNumber()) {
             stringBuilder.append(getString(1));
             position.move(1, 0);
             return makeNumber(stringBuilder);
         }
-
-        position.move(1, 0);
         return stringBuilder.toString();
     }
 
-    public String makeString(StringBuilder stringBuilder) throws IllegalCharacterException {
+    private String makeString(StringBuilder stringBuilder) throws IllegalCharacterException {
         if (getString(1).length() == 0)
-            throw new IllegalCharacterException("\"", position);
+            throw new IllegalCharacterException(
+                    "\"",
+                    input.get(position.row - 1),
+                    new Position(position.col - stringBuilder.toString().length() - 1, position.row)
+            );
 
         if(isToken(ESCAPE)) {
             position.move(1, 0);
@@ -86,20 +104,21 @@ public class Lexer {
             position.move(1, 0);
             return stringBuilder.toString();
         }
+
         stringBuilder.append(getString(1));
         position.move(1, 0);
         return makeString(stringBuilder);
     }
 
-    public boolean isNumber() {
+    private boolean isNumber() {
         return Arrays.asList(Token.DIGITS).contains(getString(1));
     }
 
-    public boolean isToken(Token.TokenType token) {
+    private boolean isToken(Token.TokenType token) {
         return getString(token.getName().length()).equals(token.getName());
     }
 
-    public String getString(int length) {
+    private String getString(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         for(int i = 0; i < length; i++)
             try {

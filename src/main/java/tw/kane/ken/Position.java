@@ -9,6 +9,11 @@ public class Position {
         row = 1;
     }
 
+    public Position(int col, int row) {
+        this.col = col;
+        this.row = row;
+    }
+
     public void jumpTo(int col, int row) {
         this.col = col;
         this.row = row;
