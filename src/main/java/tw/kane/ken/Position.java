@@ -2,7 +2,7 @@ package tw.kane.ken;
 
 public class Position {
 
-    int col, row;
+    public int col, row;
 
     public Position() {
         col = 1;

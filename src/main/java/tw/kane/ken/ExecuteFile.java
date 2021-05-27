@@ -2,12 +2,10 @@ package tw.kane.ken;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class ExecuteFile {
     private static ExecuteFile _instance;
-    private File file;
+    private final File file;
 
     public static void init(String path) throws IOException {
         if(_instance != null)
@@ -17,6 +15,8 @@ public class ExecuteFile {
 
     private ExecuteFile(String path) throws IOException {
         file = new File(path);
+        if(!file.exists() || !file.canRead())
+            throw new IOException("input file cannot be read");
     }
 
     public static File getFile() {
