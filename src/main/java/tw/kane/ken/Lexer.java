@@ -68,8 +68,6 @@ public class Lexer {
             }
         }
 
-        System.out.println("none");
-
         throw new IllegalCharacterException(getString(1), input.get(position.row - 1), position);
     }
 

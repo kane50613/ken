@@ -1,6 +1,6 @@
 package tw.kane.ken.node;
 
-import tw.kane.ken.Position;
+import tw.kane.ken.ParenParser;
 import tw.kane.ken.Token;
 
 import java.util.ArrayList;

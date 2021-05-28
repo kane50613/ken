@@ -1,7 +1,9 @@
 package tw.kane.ken;
 
+import tw.kane.ken.error.IllegalCharacterException;
+import tw.kane.ken.error.MissingCharacterException;
 import tw.kane.ken.error.SyntaxException;
-import tw.kane.ken.node.FunctionNode;
+import tw.kane.ken.error.UnexpectedTokenException;
 import tw.kane.ken.node.Node;
 import tw.kane.ken.node.RunFunctionNode;
 
@@ -11,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static tw.kane.ken.Token.TokenType.*;
+import static tw.kane.ken.Token.TokenType.METHOD;
 
 public class Parser {
 
@@ -28,9 +30,18 @@ public class Parser {
                 .collect(Collectors.toList());
     }
 
-    public void parse() throws SyntaxException {
-        if(tokens.get(0).type == METHOD)
-            nodes.add(new RunFunctionNode(tokens, input));
+    public void parse() throws SyntaxException, IllegalCharacterException, MissingCharacterException, UnexpectedTokenException {
+        if(tokens.get(0).type == METHOD) {
+            RunFunctionNode node = new RunFunctionNode(tokens, input);
+            for(int i = 0; i < node.end; i++)
+                shift();
+            nodes.add(node);
+
+            System.out.println("print");
+            for (Token arg : node.args) {
+                System.out.println(arg.type +": "+ arg.value);
+            }
+        }
     }
 
     public boolean isToken(Token.TokenType token) {
