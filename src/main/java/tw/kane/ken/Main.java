@@ -39,6 +39,7 @@ public class Main {
                         e.line,
                         Util.makeSpace(e.position.col - 1) + Util.repeatString("^", e.character.length())
                 );
+                e.printStackTrace();
             }
         } else System.out.println("ken");
     }

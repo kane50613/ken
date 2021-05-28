@@ -119,7 +119,8 @@ public class Lexer {
                         (
                                 tokens.get(tokens.size() - 1) == null ||
                                 tokens.get(tokens.size() - 1).type != INTEGER || tokens.get(tokens.size() - 1).type != FLOAT
-                        )
+                        ) &&
+                                Arrays.asList(Token.DIGITS).contains(getString(2).substring(1))
                 );
     }
 

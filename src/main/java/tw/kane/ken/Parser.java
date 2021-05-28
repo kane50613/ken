@@ -33,12 +33,23 @@ public class Parser {
     }
 
     public void parse() throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError, IOException {
+        if(tokens.size() == 0)
+            return;
         if(tokens.get(0).type == METHOD) {
             RunFunctionNode node = new RunFunctionNode(tokens, input, executeFile);
-            for(int i = 0; i < node.end; i++)
+            for(int i = 0; i < node.end - 1; i++)
                 shift();
             nodes.add(node);
+            parse();
         }
+
+        if(tokens.size() > 0)
+            throw new IllegalCharacterError(
+                    tokens.get(0).value,
+                    input.get(tokens.get(0).position.row - 1),
+                    tokens.get(0).position,
+                    executeFile
+            );
     }
 
     public boolean isToken(Token.TokenType token) {

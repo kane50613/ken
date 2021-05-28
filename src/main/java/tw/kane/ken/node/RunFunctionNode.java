@@ -96,6 +96,9 @@ public class RunFunctionNode extends Node {
                     executeFile
             );
         args.add(arg);
+
+        if(tokens.size() > end - 1 && tokens.get(end - 1).type == SEMICOLON)
+            end++;
     }
 
     @Override
