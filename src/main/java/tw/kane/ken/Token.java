@@ -17,6 +17,10 @@ public class Token {
 
     public enum TokenType {
         SPACE(" "),
+        PLUS("+"),
+        MINUS("-"),
+        MULTIPLE("*"),
+        DIV("/"),
         LPAREN("("),
         RPAREN(")"),
         MID_LPAREN("["),

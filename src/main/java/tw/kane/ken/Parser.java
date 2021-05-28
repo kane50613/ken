@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static tw.kane.ken.Token.TokenType.METHOD;
+import static tw.kane.ken.Token.TokenType.*;
 
 public class Parser {
 
@@ -32,7 +32,7 @@ public class Parser {
                 .collect(Collectors.toList());
     }
 
-    public void parse() throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError {
+    public void parse() throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError, IOException {
         if(tokens.get(0).type == METHOD) {
             RunFunctionNode node = new RunFunctionNode(tokens, input, executeFile);
             for(int i = 0; i < node.end; i++)

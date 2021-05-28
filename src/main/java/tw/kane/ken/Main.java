@@ -21,10 +21,14 @@ public class Main {
                 lexer.parse();
                 Parser parser = new Parser(lexer.getTokens(), new ExecuteFile(args[0]));
                 parser.parse();
-                parser.nodes.forEach(Node::execute);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (MissingCharacterError | UnexpectedTokenError | IllegalCharacterError | SyntaxError e) {
+                for(Node node : parser.nodes)
+                    node.execute();
+            } catch(IOException e) {
+                System.out.printf(
+                        colorize("Wrong input file %s"),
+                        args[0]
+                );
+            } catch(MissingCharacterError | UnexpectedTokenError | IllegalCharacterError | SyntaxError e) {
                 System.out.printf(
                         colorize("%s %s at %s:%d:%d\n%s\n%s%n", RED_TEXT()),
                         e.getMessage(),

@@ -1,6 +1,7 @@
 package tw.kane.ken.node;
 
 import tw.kane.ken.ExecuteFile;
+import tw.kane.ken.ParenParser;
 import tw.kane.ken.Token;
 import tw.kane.ken.error.IllegalCharacterError;
 import tw.kane.ken.error.MissingCharacterError;
@@ -9,6 +10,7 @@ import tw.kane.ken.error.UnexpectedTokenError;
 import tw.kane.ken.function.BuiltInFunction;
 import tw.kane.ken.function.Function;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,8 @@ public class RunFunctionNode extends Node {
     public ArrayList<ArrayList<Token>> args = new ArrayList<>();
     public ExecuteFile executeFile;
 
-    public RunFunctionNode(ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError {
+    public RunFunctionNode(ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError, IOException {
+        super(tokens, executeFile);
         this.executeFile = executeFile;
 
         for (Function func : BuiltInFunction.functions)
@@ -96,18 +99,13 @@ public class RunFunctionNode extends Node {
     }
 
     @Override
-    public Object execute() {
-//        return function.execute(args.stream().map(x -> {
-//            if(x.type == INTEGER)
-//                return Integer.parseInt(x.value);
-//            if(x.type == FLOAT)
-//                return Float.parseFloat(x.value);
-//            if(x.type == TRUE || x.type == FALSE)
-//                return Boolean.parseBoolean(x.value);
-//            if(x.type == STRING)
-//                return String.valueOf(x.value);
-//            return null;
-//        }).toArray());
-        return null;
+    public Object execute() throws UnexpectedTokenError, SyntaxError, IOException {
+        ArrayList<Object> executeArgs = new ArrayList<>();
+        for (ArrayList<Token> arg : args) {
+            ParenParser parenParser = new ParenParser(arg, input, executeFile);
+            executeArgs.add(parenParser.parse().execute());
+        }
+
+        return function.execute(executeArgs.toArray());
     }
 }
