@@ -48,7 +48,7 @@ public class Lexer {
             return parse();
         }
 
-        if(isNumber()) {
+        if(isNumber("")) {
             String number = makeNumber(new StringBuilder());
             tokens.add(new Token(number.contains(".") ? FLOAT : INTEGER, number, position));
             return parse();
@@ -78,7 +78,7 @@ public class Lexer {
     }
 
     private String makeNumber(StringBuilder stringBuilder) {
-        if(isNumber()) {
+        if(isNumber(stringBuilder.toString())) {
             stringBuilder.append(getString(1));
             position.move(1, 0);
             return makeNumber(stringBuilder);
@@ -111,14 +111,14 @@ public class Lexer {
         return makeString(stringBuilder);
     }
 
-    private boolean isNumber() {
+    private boolean isNumber(String num) {
         return Arrays.asList(Token.DIGITS).contains(getString(1)) ||
                 getString(1).equals(".") ||
                 (
-                        getString(1).equals("-") || getString(1).equals("+") &&
+                        num.length() == 0 && getString(1).equals("-") &&
                         (
                                 tokens.get(tokens.size() - 1) == null ||
-                                tokens.get(tokens.size() - 1).type != INTEGER || tokens.get(tokens.size() - 1).type != FLOAT
+                                        (tokens.get(tokens.size() - 1).type != INTEGER && tokens.get(tokens.size() - 1).type != FLOAT)
                         ) &&
                                 Arrays.asList(Token.DIGITS).contains(getString(2).substring(1))
                 );

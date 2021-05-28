@@ -1,5 +1,6 @@
 package tw.kane.ken;
 
+import tw.kane.ken.error.SyntaxError;
 import tw.kane.ken.error.UnexpectedTokenError;
 import tw.kane.ken.node.*;
 
@@ -12,39 +13,94 @@ import static tw.kane.ken.Token.TokenType.*;
 public class ParenParser {
 
     private final ArrayList<Token> tokens;
+    private ArrayList<Node> tokenNodes;
     private final ExecuteFile executeFile;
     private final List<String> input;
 
-    public ParenParser(ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) {
+    public ParenParser(ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) throws IOException {
         this.executeFile = executeFile;
         this.tokens = tokens;
         this.input = input;
+        tokenNodes = new ArrayList<>();
+
+        for(int i = 0; i < tokens.size(); i++)
+            tokenNodes.add(new TokenNode(
+                    tokens.get(i),
+                    new ArrayList<>(tokens.subList(i, i+1)),
+                    executeFile
+            ));
     }
 
-    public Node parse() throws IOException, UnexpectedTokenError {
-        if(tokens.size() == 1)
-            return makeNode(tokens.get(0));
+    public ParenParser(ArrayList<Node> tokenNodes, ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) {
+        this.executeFile = executeFile;
+        this.input = input;
+        this.tokens = tokens;
+        this.tokenNodes = tokenNodes;
+    }
+
+    public Node parse() throws IOException, UnexpectedTokenError, SyntaxError {
+        if(tokenNodes.size() == 1)
+            return tokenNodes.get(0) instanceof TokenNode ?
+                    makeNode((Token) tokenNodes.get(0).execute()) :
+                    tokenNodes.get(0);
+
+        int lParen, rParen;
+
+        do {
+            lParen = -1;
+            rParen = -1;
+
+            for(int i = 0; i < tokenNodes.size(); i++) {
+                if(!(tokenNodes.get(i) instanceof TokenNode))
+                    continue;
+                if(((Token) tokenNodes.get(i).execute()).type == LPAREN)
+                    lParen = i;
+                if(((Token) tokenNodes.get(i).execute()).type == RPAREN) {
+                    rParen = i;
+                    break;
+                }
+            }
+
+            if(lParen != -1 && rParen != -1) {
+                ArrayList<Node> _node = new ArrayList<>();
+                _node.add(new ParenParser(new ArrayList<>(tokenNodes.subList(lParen + 1, rParen)), tokens, input, executeFile).parse());
+                tokenNodes = replaceArrayFromTo(
+                        tokenNodes,
+                        lParen,
+                        rParen,
+                        _node
+                );
+            }
+        } while(lParen != -1 || rParen != -1);
 
         int plusOrMinus = -1;
-        for(int i = 0; i < tokens.size(); i++)
-            if(tokens.get(i).type == PLUS || tokens.get(i).type == MINUS)
+        for(int i = 0; i < tokenNodes.size(); i++) {
+            if(!(tokenNodes.get(i) instanceof TokenNode))
+                continue;
+            if(((Token) tokenNodes.get(i).execute()).type == PLUS || ((Token) tokenNodes.get(i).execute()).type == MINUS)
                 plusOrMinus = i;
+        }
         if(plusOrMinus != -1)
             return makeBinaryNode(plusOrMinus);
 
         int mulOrDiv = -1;
-        for(int i = 0; i < tokens.size(); i++)
-            if(tokens.get(i).type == MULTIPLE || tokens.get(i).type == DIV)
+        for(int i = 0; i < tokenNodes.size(); i++) {
+            if(!(tokenNodes.get(i) instanceof TokenNode))
+                continue;
+            if(((Token) tokenNodes.get(i).execute()).type == MULTIPLE || ((Token) tokenNodes.get(i).execute()).type == DIV)
                 mulOrDiv = i;
+        }
         if(mulOrDiv != -1)
             return makeBinaryNode(mulOrDiv);
 
-        throw new UnexpectedTokenError(
-                tokens.get(1).value,
-                input.get(tokens.get(1).position.row - 1),
-                tokens.get(1).position,
-                executeFile
-        );
+        if(tokenNodes.get(1) instanceof TokenNode)
+            throw new UnexpectedTokenError(
+                    ((Token) tokenNodes.get(1).execute()).value,
+                    input.get(((Token) tokenNodes.get(1).execute()).position.row - 1),
+                    ((Token) tokenNodes.get(1).execute()).position,
+                    executeFile
+            );
+        return null;
     }
 
     public Node makeNode(Token token) throws IOException, UnexpectedTokenError {
@@ -66,13 +122,23 @@ public class ParenParser {
         );
     }
 
-    public BinaryNode makeBinaryNode(int position) throws IOException, UnexpectedTokenError {
+    public BinaryNode makeBinaryNode(int position) throws IOException, UnexpectedTokenError, SyntaxError {
         return new BinaryNode(
-                new ParenParser(new ArrayList<>(tokens.subList(0, position)), input, executeFile).parse(),
-                tokens.get(1),
-                new ParenParser(new ArrayList<>(tokens.subList(position + 1, tokens.size())), input, executeFile).parse(),
+                new ParenParser(new ArrayList<>(tokenNodes.subList(0, position)), tokens, input, executeFile).parse(),
+                (Token) tokenNodes.get(position).execute(),
+                new ParenParser(new ArrayList<>(tokenNodes.subList(position + 1, tokenNodes.size())), tokens, input, executeFile).parse(),
                 tokens,
                 executeFile
         );
+    }
+
+    public <T> ArrayList<T> replaceArrayFromTo(ArrayList<T> array, int start, int end, ArrayList<T> replace) {
+        ArrayList<T> _array = new ArrayList<>();
+        for (int i = 0; i < start; i++)
+            _array.add(array.get(i));
+        _array.addAll(replace);
+        for (int i = end + 1; i <= array.size() - 1; i++)
+            _array.add(array.get(i));
+        return _array;
     }
 }
