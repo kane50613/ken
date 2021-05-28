@@ -6,6 +6,7 @@ import tw.kane.ken.error.IllegalCharacterError;
 import tw.kane.ken.error.MissingCharacterError;
 import tw.kane.ken.error.SyntaxError;
 import tw.kane.ken.error.UnexpectedTokenError;
+import tw.kane.ken.node.Node;
 
 import java.io.IOException;
 
@@ -20,7 +21,7 @@ public class Main {
                 lexer.parse();
                 Parser parser = new Parser(lexer.getTokens(), new ExecuteFile(args[0]));
                 parser.parse();
-                parser.nodes.get(0).execute();
+                parser.nodes.forEach(Node::execute);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (MissingCharacterError | UnexpectedTokenError | IllegalCharacterError | SyntaxError e) {
