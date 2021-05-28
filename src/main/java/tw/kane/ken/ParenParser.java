@@ -2,6 +2,7 @@ package tw.kane.ken;
 
 import tw.kane.ken.error.SyntaxError;
 import tw.kane.ken.error.UnexpectedTokenError;
+import tw.kane.ken.error.UnknownError;
 import tw.kane.ken.node.*;
 
 import java.io.IOException;
@@ -38,12 +39,7 @@ public class ParenParser {
         this.tokenNodes = tokenNodes;
     }
 
-    public Node parse() throws IOException, UnexpectedTokenError, SyntaxError {
-        if(tokenNodes.size() == 1)
-            return tokenNodes.get(0) instanceof TokenNode ?
-                    makeNode((Token) tokenNodes.get(0).execute()) :
-                    tokenNodes.get(0);
-
+    public Node parse() throws IOException, UnexpectedTokenError, SyntaxError, UnknownError {
         int lParen, rParen;
 
         do {
@@ -73,6 +69,11 @@ public class ParenParser {
             }
         } while(lParen != -1 || rParen != -1);
 
+        if(tokenNodes.size() == 1)
+            return tokenNodes.get(0) instanceof TokenNode ?
+                    makeNode((Token) tokenNodes.get(0).execute()) :
+                    tokenNodes.get(0);
+
         int plusOrMinus = -1;
         for(int i = 0; i < tokenNodes.size(); i++) {
             if(!(tokenNodes.get(i) instanceof TokenNode))
@@ -93,14 +94,14 @@ public class ParenParser {
         if(mulOrDiv != -1)
             return makeBinaryNode(mulOrDiv);
 
-        if(tokenNodes.get(1) instanceof TokenNode)
+        if(tokenNodes.size() > 0 && tokenNodes.get(1) instanceof TokenNode)
             throw new UnexpectedTokenError(
                     ((Token) tokenNodes.get(1).execute()).value,
                     input.get(((Token) tokenNodes.get(1).execute()).position.row - 1),
                     ((Token) tokenNodes.get(1).execute()).position,
                     executeFile
             );
-        return null;
+        throw new UnknownError("Unknown node error");
     }
 
     public Node makeNode(Token token) throws IOException, UnexpectedTokenError {
@@ -122,11 +123,12 @@ public class ParenParser {
         );
     }
 
-    public BinaryNode makeBinaryNode(int position) throws IOException, UnexpectedTokenError, SyntaxError {
+    public BinaryNode makeBinaryNode(int position) throws IOException, UnexpectedTokenError, SyntaxError, UnknownError {
         return new BinaryNode(
                 new ParenParser(new ArrayList<>(tokenNodes.subList(0, position)), tokens, input, executeFile).parse(),
                 (Token) tokenNodes.get(position).execute(),
                 new ParenParser(new ArrayList<>(tokenNodes.subList(position + 1, tokenNodes.size())), tokens, input, executeFile).parse(),
+                tokenNodes,
                 tokens,
                 executeFile
         );

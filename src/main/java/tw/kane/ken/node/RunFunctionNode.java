@@ -7,6 +7,7 @@ import tw.kane.ken.error.IllegalCharacterError;
 import tw.kane.ken.error.MissingCharacterError;
 import tw.kane.ken.error.SyntaxError;
 import tw.kane.ken.error.UnexpectedTokenError;
+import tw.kane.ken.error.UnknownError;
 import tw.kane.ken.function.BuiltInFunction;
 import tw.kane.ken.function.Function;
 
@@ -102,7 +103,7 @@ public class RunFunctionNode extends Node {
     }
 
     @Override
-    public Object execute() throws UnexpectedTokenError, SyntaxError, IOException {
+    public Object execute() throws UnexpectedTokenError, SyntaxError, IOException, UnknownError {
         ArrayList<Object> executeArgs = new ArrayList<>();
         for (ArrayList<Token> arg : args) {
             ParenParser parenParser = new ParenParser(arg, input, executeFile);

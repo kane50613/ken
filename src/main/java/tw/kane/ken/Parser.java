@@ -35,7 +35,7 @@ public class Parser {
     public void parse() throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError, IOException {
         if(tokens.size() == 0)
             return;
-        if(tokens.get(0).type == METHOD) {
+        if(isToken(METHOD)) {
             RunFunctionNode node = new RunFunctionNode(tokens, input, executeFile);
             for(int i = 0; i < node.end - 1; i++)
                 shift();
