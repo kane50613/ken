@@ -1,10 +1,9 @@
 package tw.kane.ken;
 
-import tw.kane.ken.error.IllegalCharacterException;
+import tw.kane.ken.error.IllegalCharacterError;
 import tw.kane.ken.function.BuiltInFunction;
 import tw.kane.ken.function.Function;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -17,17 +16,19 @@ import static tw.kane.ken.Token.TokenType.*;
 public class Lexer {
     private final Position position;
     private final List<String> input;
+    private final ExecuteFile executeFile;
     private final ArrayList<Token> tokens;
 
     public Lexer(ExecuteFile file) throws IOException {
         position = new Position();
         tokens = new ArrayList<>();
+        executeFile = file;
         input = Files.readAllLines(file.getFile().toPath()).stream()
                 .filter(x -> x.length() > 0)
                 .collect(Collectors.toList());
     }
 
-    public ArrayList<Token> parse() throws IllegalCharacterException {
+    public ArrayList<Token> parse() throws IllegalCharacterError {
         if(position.row > input.size())
             return tokens;
 
@@ -48,7 +49,8 @@ public class Lexer {
         }
 
         if(isNumber()) {
-            tokens.add(new Token(NUMBER, makeNumber(new StringBuilder()), position));
+            String number = makeNumber(new StringBuilder());
+            tokens.add(new Token(number.contains(".") ? FLOAT : INTEGER, number, position));
             return parse();
         }
 
@@ -68,7 +70,7 @@ public class Lexer {
             }
         }
 
-        throw new IllegalCharacterException(getString(1), input.get(position.row - 1), position);
+        throw new IllegalCharacterError(getString(1), input.get(position.row - 1), position, executeFile);
     }
 
     public ArrayList<Token> getTokens() {
@@ -84,12 +86,13 @@ public class Lexer {
         return stringBuilder.toString();
     }
 
-    private String makeString(StringBuilder stringBuilder) throws IllegalCharacterException {
+    private String makeString(StringBuilder stringBuilder) throws IllegalCharacterError {
         if (getString(1).length() == 0)
-            throw new IllegalCharacterException(
+            throw new IllegalCharacterError(
                     "\"",
                     input.get(position.row - 1),
-                    new Position(position.col - stringBuilder.toString().length() - 1, position.row)
+                    new Position(position.col - stringBuilder.toString().length() - 1, position.row),
+                    executeFile
             );
 
         if(isToken(ESCAPE)) {
@@ -109,7 +112,15 @@ public class Lexer {
     }
 
     private boolean isNumber() {
-        return Arrays.asList(Token.DIGITS).contains(getString(1));
+        return Arrays.asList(Token.DIGITS).contains(getString(1)) ||
+                getString(1).equals(".") ||
+                (
+                        getString(1).equals("-") || getString(1).equals("+") &&
+                        (
+                                tokens.get(tokens.size() - 1) == null ||
+                                tokens.get(tokens.size() - 1).type != INTEGER || tokens.get(tokens.size() - 1).type != FLOAT
+                        )
+                );
     }
 
     private boolean isToken(Token.TokenType token) {

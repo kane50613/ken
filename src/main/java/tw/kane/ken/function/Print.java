@@ -1,5 +1,8 @@
 package tw.kane.ken.function;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public class Print extends Function {
 
     public Print() {
@@ -7,7 +10,13 @@ public class Print extends Function {
     }
 
     @Override
-    public void execute(String[] args) {
-        System.out.println(String.join(" ", args));
+    public Object execute(Object[] args) {
+        System.out.print(
+                Arrays
+                .stream(args)
+                .map(String::valueOf)
+                .collect(Collectors.joining(" "))
+        );
+        return null;
     }
 }

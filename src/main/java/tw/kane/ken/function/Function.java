@@ -12,5 +12,5 @@ public abstract class Function {
         return name;
     }
 
-    public abstract void execute(String[] args);
+    public abstract Object execute(Object[] args);
 }
