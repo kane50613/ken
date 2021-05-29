@@ -43,34 +43,68 @@ public class Lexer {
         }
 
         if(isToken(QUOTE)) {
-            position.move(1, 0);
-            tokens.add(new Token(STRING, makeString(new StringBuilder()), position));
+            String string = makeString(new StringBuilder());
+            tokens.add(new Token(STRING, string, position));
+            position.move(string.length(), 0);
             return parse();
         }
 
         if(isNumber("")) {
             String number = makeNumber(new StringBuilder());
             tokens.add(new Token(number.contains(".") ? FLOAT : INTEGER, number, position));
+            position.move(number.length(), 0);
             return parse();
         }
 
-        for(Token.TokenType token : values()) {
+        if(isToken(LET)) {
+            tokens.add(new Token(LET, LET.getName(), position));
+            position.move(LET.length(), 0);
+            String name = makeVariable(new StringBuilder());
+
+            //check if name already exist or is token word
+            for(Token.TokenType token : values())
+                if(name.equals(token.getName()))
+                    throw new IllegalCharacterError(
+                            name,
+                            input.get(position.row - 1),
+                            position,
+                            executeFile
+                    );
+
+            for (Function function : BuiltInFunction.functions)
+                if(name.equals(function.getName()))
+                    throw new IllegalCharacterError(
+                            name,
+                            input.get(position.row - 1),
+                            position,
+                            executeFile
+                    );
+
+            tokens.add(new Token(VARIABLE, name, position));
+            position.move(name.length(), 0);
+            return parse();
+        }
+
+        for(Token.TokenType token : values())
             if(isToken(token)) {
                 tokens.add(new Token(token, getString(token.length()), position));
                 position.move(token.length(), 0);
                 return parse();
             }
-        }
 
-        for (Function function : BuiltInFunction.functions) {
+        for (Function function : BuiltInFunction.functions)
             if(getString(function.getName().length()).equals(function.getName())) {
                 tokens.add(new Token(METHOD, function.getName(), position));
                 position.move(function.getName().length(), 0);
                 return parse();
             }
-        }
 
-        throw new IllegalCharacterError(getString(1), input.get(position.row - 1), position, executeFile);
+        throw new IllegalCharacterError(
+                getString(1),
+                input.get(position.row - 1),
+                position,
+                executeFile
+        );
     }
 
     public ArrayList<Token> getTokens() {
@@ -83,6 +117,7 @@ public class Lexer {
             position.move(1, 0);
             return makeNumber(stringBuilder);
         }
+        position.back(stringBuilder.toString().length(), 0);
         return stringBuilder.toString();
     }
 
@@ -102,13 +137,23 @@ public class Lexer {
             return makeString(stringBuilder);
         }
         if(isToken(QUOTE)) {
-            position.move(1, 0);
+            position.back(stringBuilder.toString().length(), 0);
             return stringBuilder.toString();
         }
 
         stringBuilder.append(getString(1));
         position.move(1, 0);
         return makeString(stringBuilder);
+    }
+
+    public String makeVariable(StringBuilder stringBuilder) {
+        if(!getString(1).equals(SPACE.getName()) && getString(1).length() > 0) {
+            stringBuilder.append(getString(1));
+            position.move(1, 0);
+            return makeVariable(stringBuilder);
+        }
+        position.back(stringBuilder.toString().length(), 0);
+        return stringBuilder.toString();
     }
 
     private boolean isNumber(String num) {

@@ -35,12 +35,14 @@ public class Token {
         NEW_LINE("\n"),
         STRING("STRING"),
         INTEGER("INTEGER"),
+        VARIABLE("VARIABLE"),
         FLOAT("FLOAT"),
         TRUE("true"),
         FALSE("false"),
         FUNCTION("function"),
         IF("if"),
         ELSE("else"),
+        LET("let "),
         METHOD("method");
 
         private final String name;

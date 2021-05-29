@@ -23,4 +23,9 @@ public class Position {
         this.col += col;
         this.row += row;
     }
+
+    public void back(int col, int row) {
+        this.col -= col;
+        this.row -= row;
+    }
 }
