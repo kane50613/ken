@@ -56,34 +56,34 @@ public class Lexer {
             return parse();
         }
 
-        if(isToken(LET)) {
-            tokens.add(new Token(LET, LET.getName(), position));
-            position.move(LET.length(), 0);
-            String name = makeVariable(new StringBuilder());
-
-            //check if name already exist or is token word
-            for(Token.TokenType token : values())
-                if(name.equals(token.getName()))
-                    throw new IllegalCharacterError(
-                            name,
-                            input.get(position.row - 1),
-                            position,
-                            executeFile
-                    );
-
-            for (Function function : BuiltInFunction.functions)
-                if(name.equals(function.getName()))
-                    throw new IllegalCharacterError(
-                            name,
-                            input.get(position.row - 1),
-                            position,
-                            executeFile
-                    );
-
-            tokens.add(new Token(VARIABLE, name, position));
-            position.move(name.length(), 0);
-            return parse();
-        }
+//        if(isToken(LET)) {
+//            tokens.add(new Token(LET, LET.getName(), position));
+//            position.move(LET.length(), 0);
+//            String name = makeVariable(new StringBuilder());
+//
+//            //check if name already exist or is token word
+//            for(Token.TokenType token : values())
+//                if(name.equals(token.getName()))
+//                    throw new IllegalCharacterError(
+//                            name,
+//                            input.get(position.row - 1),
+//                            position,
+//                            executeFile
+//                    );
+//
+//            for (Function function : BuiltInFunction.functions)
+//                if(name.equals(function.getName()))
+//                    throw new IllegalCharacterError(
+//                            name,
+//                            input.get(position.row - 1),
+//                            position,
+//                            executeFile
+//                    );
+//
+//            tokens.add(new Token(VARIABLE, name, position));
+//            position.move(name.length(), 0);
+//            return parse();
+//        }
 
         for(Token.TokenType token : values())
             if(isToken(token)) {
@@ -92,7 +92,7 @@ public class Lexer {
                 return parse();
             }
 
-        for (Function function : BuiltInFunction.functions)
+        for(Function function : BuiltInFunction.functions)
             if(getString(function.getName().length()).equals(function.getName())) {
                 tokens.add(new Token(METHOD, function.getName(), position));
                 position.move(function.getName().length(), 0);
