@@ -34,11 +34,11 @@ public class BinaryNode extends Node {
         if(resultL instanceof Integer)
             leftI = (int) resultL;
         else {
-            if(tokenNodes.get(0) instanceof TokenNode)
+            if(leftNode instanceof TokenNode)
                 throw new SyntaxError(
-                        ((Token) tokenNodes.get(0).execute()).value,
-                        input.get(((Token) tokenNodes.get(0).execute()).position.row - 1),
-                        ((Token) tokenNodes.get(0).execute()).position,
+                        ((Token) leftNode.execute()).value,
+                        input.get(((Token) leftNode.execute()).position.row - 1),
+                        ((Token) leftNode.execute()).position,
                         executeFile
                 );
             throw new UnknownError("Wrong usage of operator");
@@ -47,11 +47,11 @@ public class BinaryNode extends Node {
         if(resultR instanceof Integer)
             rightI = (int) resultR;
         else {
-            if(tokenNodes.get(1) instanceof TokenNode)
+            if(rightNode instanceof TokenNode)
                 throw new SyntaxError(
-                        ((Token) tokenNodes.get(1).execute()).value,
-                        input.get(((Token) tokenNodes.get(1).execute()).position.row - 1),
-                        ((Token) tokenNodes.get(1).execute()).position,
+                        ((Token) rightNode.execute()).value,
+                        input.get(((Token) rightNode.execute()).position.row - 1),
+                        ((Token) rightNode.execute()).position,
                         executeFile
                 );
             throw new UnknownError("Wrong usage of operator");
@@ -67,9 +67,9 @@ public class BinaryNode extends Node {
             return leftI / rightI;
 
         throw new UnexpectedTokenError(
-                tokens.get(1).value,
-                input.get(tokens.get(1).position.row - 1),
-                tokens.get(1).position,
+                operator.value,
+                input.get(operator.position.row - 1),
+                operator.position,
                 executeFile
         );
     }

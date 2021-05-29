@@ -3,7 +3,6 @@ package tw.kane.ken.node;
 import tw.kane.ken.ExecuteFile;
 import tw.kane.ken.ParenParser;
 import tw.kane.ken.Token;
-import tw.kane.ken.error.IllegalCharacterError;
 import tw.kane.ken.error.MissingCharacterError;
 import tw.kane.ken.error.SyntaxError;
 import tw.kane.ken.error.UnexpectedTokenError;
@@ -20,11 +19,11 @@ import static tw.kane.ken.Token.TokenType.*;
 public class RunFunctionNode extends Node {
 
     public Function function;
-    public int end = 1, lParen = 0, rParen = 0, firstP = 0, finalP = 0;
+    public int end = 1, lParen = 0, rParen = 0, firstP = -1, finalP = -1;
     public ArrayList<ArrayList<Token>> args = new ArrayList<>();
     public ExecuteFile executeFile;
 
-    public RunFunctionNode(ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) throws SyntaxError, IllegalCharacterError, MissingCharacterError, UnexpectedTokenError, IOException {
+    public RunFunctionNode(ArrayList<Token> tokens, List<String> input, ExecuteFile executeFile) throws SyntaxError, MissingCharacterError, UnexpectedTokenError, IOException {
         super(tokens, executeFile);
         this.executeFile = executeFile;
 
@@ -40,15 +39,23 @@ public class RunFunctionNode extends Node {
                     executeFile
             );
 
+//        if(tokens.get(1).type != LPAREN)
+//            throw new UnexpectedTokenError(
+//                    tokens.get(1).value,
+//                    input.get(tokens.get(1).position.row - 1),
+//                    tokens.get(1).position,
+//                    executeFile
+//            );
+
         for(int i = 0; i < tokens.size(); i++) {
             end++;
             if(tokens.get(i).type == LPAREN) {
-                if(lParen == 0) {
+                if(firstP == -1) {
                     if(i > 1)
-                        throw new IllegalCharacterError(
+                        throw new UnexpectedTokenError(
                                 tokens.get(i).value,
-                                input.get(tokens.get(0).position.row - 1),
-                                tokens.get(0).position,
+                                input.get(tokens.get(i).position.row - 1),
+                                tokens.get(i).position,
                                 executeFile
                         );
                     firstP = i;
@@ -68,8 +75,8 @@ public class RunFunctionNode extends Node {
         if(lParen > rParen)
             throw new MissingCharacterError(
                     RPAREN.getName(),
-                    input.get(tokens.get(finalP).position.row - 1),
-                    tokens.get(finalP).position,
+                    input.get(tokens.get(lParen).position.row - 1),
+                    tokens.get(lParen).position,
                     executeFile
             );
 
@@ -90,12 +97,8 @@ public class RunFunctionNode extends Node {
         }
 
         if(arg.size() == 0)
-            throw new UnexpectedTokenError(
-                    tokens.get(finalP - 1).value,
-                    input.get(tokens.get(finalP - 1).position.row - 1),
-                    tokens.get(finalP - 1).position,
-                    executeFile
-            );
+            return;
+
         args.add(arg);
 
         if(tokens.size() > end - 1 && tokens.get(end - 1).type == SEMICOLON)
