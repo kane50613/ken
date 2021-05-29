@@ -83,21 +83,11 @@ public class RunFunctionNode extends Node {
         ArrayList<Token> arg = new ArrayList<>();
         for (Token t : tokens.subList(firstP + 1, finalP)) {
             if(t.type == COMMA) {
-                if(arg.size() == 0)
-                    throw new UnexpectedTokenError(
-                            t.value,
-                            input.get(t.position.row - 1),
-                            t.position,
-                            executeFile
-                    );
                 args.add(arg);
                 arg = new ArrayList<>();
             }
             else arg.add(t);
         }
-
-        if(arg.size() == 0)
-            return;
 
         args.add(arg);
 

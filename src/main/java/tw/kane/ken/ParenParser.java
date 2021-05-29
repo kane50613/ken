@@ -40,6 +40,8 @@ public class ParenParser {
     }
 
     public Node parse() throws IOException, UnexpectedTokenError, SyntaxError, UnknownError {
+        if(tokenNodes.size() == 0)
+            return new NullNode(new ArrayList<>(), executeFile);
         int lParen, rParen;
 
         do {
